@@ -1,4 +1,6 @@
 <?php
+	require_once('class.hex2bin.php');
+
 	class Feistel2 {
 		
 		protected $rondas;
@@ -7,12 +9,35 @@
 		public function __construct(){
 			$this->arrIteracion = array();
 		}		
+		
+		public function limpiar(){
+			$this->arrIteracion=array();
+		}
+		
 		private static function abinario($texto){
 			$binario = "";
 			$longitud = strlen($texto);
 			for($i=0;$i<$longitud;$i++){
 				$letra = substr($texto,$i,1);
 				$tmp = decbin(ord($letra));
+				$longBin =strlen($tmp); 
+				if($longBin<8){
+					for($j=0;$j<(8-$longBin);$j++){
+						$tmp="0".$tmp;
+					}
+				}
+				$binario.=$tmp;
+			}
+			return $binario;
+		}
+		
+		private static function abinario2($texto){
+			$objHex = new hex2bin();
+			$binario = "";
+			$longitud = strlen($texto)/2;		//Hexadecimal es el doble
+			for($i=0;$i<$longitud;$i++){
+				$letra = substr($texto,($i*2),2);
+				$tmp = decbin(ord($objHex->convert($letra)));
 				$longBin =strlen($tmp); 
 				if($longBin<8){
 					for($j=0;$j<(8-$longBin);$j++){
@@ -105,6 +130,17 @@
 			return $resultado;
 		}
 		
+		public static function enHex($binario){
+			$longitud = strlen($binario);
+			$cantLetras = $longitud/8;
+			$resultado="";
+			for($i=0;$i<$cantLetras;$i++){
+				$byteHex = substr($binario,($i*8),8);
+				$char = chr(bindec($byteHex));
+				$resultado.=bin2hex($char);
+			}
+			return $resultado;
+		}
 		
 		/**
 		 * Encripta  
@@ -122,8 +158,9 @@
 				array_push($this->arrIteracion,array($izquierda,$derecha,$clave));
 				$this->iterar($rondas);
 				$arrDatosFinales = $this->arrIteracion[count($this->arrIteracion)-1];//array_pop($this->arrIteracion);
-				$encriptado = self::enAscii($arrDatosFinales[0]).self::enAscii($arrDatosFinales[1]);
+				$encriptado = self::enHex($arrDatosFinales[0]).self::enHex($arrDatosFinales[1]);
 			}
+			$this->limpiar();
 			return array($encriptado,self::enAscii($arrDatosFinales[2]));
 		}
 		
@@ -132,7 +169,7 @@
 		 * */
 		public function desencriptar($texto,$clave,$rondas){
 			$desencriptado = "";
-			$binario = self::abinario($texto);
+			$binario = self::abinario2($texto);
 			$clave = self::abinario($clave);
 			
 			$mitad = strlen($binario)/2;
@@ -146,6 +183,7 @@
 				$arrDatosFinales = $this->arrIteracion[count($this->arrIteracion)-1];
 				$encriptado = self::enAscii($arrDatosFinales[0]).self::enAscii($arrDatosFinales[1]);
 			}
+			$this->limpiar();
 			return array($encriptado,self::enAscii($arrDatosFinales[2]));
 			
 		}
