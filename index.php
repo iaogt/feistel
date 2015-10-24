@@ -33,7 +33,7 @@
 			$errorDescifrar = "La clave debe ser de 8 caracteres";
 		}
 		if($errorDescifrar=="")
-			$o = $cipher->desencriptar($clave,$clave,8);	//8 rondas definidas
+			$o = $cipher->desencriptar($texto,$clave,8);	//8 rondas definidas
 		$o[0]=str_replace(chr(9),'', $o[0]);		//Elimina los pads
 	}
 ?>
