@@ -13,21 +13,27 @@
 				$texto.=chr(9);
 			}
 		}
+		$clave = $_POST['txtClave'];
 		$longitud = strlen($_POST['txtClave']);
-		if($longitud!=8){
-			$errorCifrar = "La clave debe ser de 8 caracteres";
+		if($longitud<=8){
+			for($pad=0;$pad<(8-$longitud);$pad++){		//Forzar a una longitud de 16
+				$clave.=chr(9);
+			}
+		}
+		if($longitud>8){
+			$clave = substr($_POST['txtClave'], 0,8);
 		}
 		if($errorCifrar=="")
-			$e = $cipher->encriptar($texto,$_POST['txtClave'],2);
+			$e = $cipher->encriptar($texto,$clave,2);
 	}
 	if($_POST['descifrar']){
 		$cipher = new Feistel2();
-		$longitud = strlen($_POST['txtClave']);
+		$longitud = strlen($clave);
 		if($longitud!=8){
 			$errorDescifrar = "La clave debe ser de 8 caracteres";
 		}
 		if($errorDescifrar=="")
-			$o = $cipher->desencriptar($_POST['txtTexto'],$_POST['txtClave'],2);
+			$o = $cipher->desencriptar($clave,$clave,8);	//8 rondas definidas
 		$o[0]=str_replace(chr(9),'', $o[0]);		//Elimina los pads
 	}
 ?>
